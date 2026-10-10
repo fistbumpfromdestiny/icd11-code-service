@@ -33,11 +33,11 @@
 - [x] 4.5 Manual real-data check, not a Pest test: 2025-01 to 2026-01 run (expect 0 added, 4 removed, 0 recoded, 0 moved, 0 code_reused, 86 retitled, 2 retitled_cosmetic); save output for the README
 
 ## 5. Search (code-search)
-- [ ] 5.1 Migrations: search_vector, GIN and trigram indexes, pg_trgm extension
-- [ ] 5.2 Weighted search_vector: own title (A) plus ancestor titles (C), built at import
-- [ ] 5.3 Fixtures tests/Fixtures/icd/search.txt and search-2025.txt with the rows listed in design.md (real rows and 6D80.0's coding note copied verbatim from the releases)
-- [ ] 5.4 QueryClassifier (normalization, code detection, code queries upper-cased)
-- [ ] 5.5 CodeSearch: code, all-words full-text with partial last word, some-words fallback, trigram above the fixed `search.trigram_threshold` in config/icd.php; tiers, exact code first, tie-break comparator as a pure function tested over five synthetic hits, dedupe, matched_via
+- [x] 5.1 Migrations: search_vector, GIN and trigram indexes, pg_trgm extension
+- [x] 5.2 Weighted search_vector: own title (A) plus ancestor titles (C), built at import
+- [x] 5.3 Fixtures tests/Fixtures/icd/search.txt and search-2025.txt with the rows listed in design.md (real rows and 6D80.0's coding note copied verbatim from the releases)
+- [x] 5.4 QueryClassifier (normalization, code detection, code queries upper-cased)
+- [x] 5.5 CodeSearch: code, all-words full-text with partial last word, some-words fallback, trigram above the fixed `search.trigram_threshold` in config/icd.php; tiers, exact code first, tie-break comparator as a pure function tested over five synthetic hits, dedupe, matched_via
 - [ ] 5.6 Release selection: latest imported release by default, release parameter, 404 for an unknown release, 503 when none is imported
 - [ ] 5.7 Choose the trigram_threshold value against real queries; note ranking decisions
 

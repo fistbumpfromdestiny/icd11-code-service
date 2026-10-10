@@ -134,6 +134,39 @@ class ReleaseImporter
              where e.release_id = ? and p.release_id = e.release_id and p.linearization_uri = e.parent_uri',
             [$release->id],
         );
+
+        $this->buildSearchVectors($release);
+    }
+
+    /**
+     * Own title at weight A, the titles of every ancestor (categories, blocks,
+     * chapter) at weight C, so "Lumbago with sciatica" is found for "back pain".
+     */
+    private function buildSearchVectors(Release $release): void
+    {
+        DB::update(
+            "with recursive ancestors (id, ancestor_id) as (
+                 select id, parent_id from icd_entities where release_id = ? and parent_id is not null
+                 union all
+                 select a.id, p.parent_id
+                 from ancestors as a
+                 join icd_entities as p on p.id = a.ancestor_id
+                 where p.parent_id is not null
+             ),
+             context as (
+                 select a.id, string_agg(p.title, ' ') as titles
+                 from ancestors as a
+                 join icd_entities as p on p.id = a.ancestor_id
+                 group by a.id
+             )
+             update icd_entities as e
+             set search_vector = setweight(to_tsvector('english', e.title), 'A')
+                 || setweight(to_tsvector('english', coalesce(c.titles, '')), 'C')
+             from icd_entities as s
+             left join context as c on c.id = s.id
+             where s.id = e.id and e.release_id = ?",
+            [$release->id, $release->id],
+        );
     }
 
     /**

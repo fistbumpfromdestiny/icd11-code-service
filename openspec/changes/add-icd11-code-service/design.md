@@ -176,7 +176,8 @@ altered content.
 Every real row comes with all its ancestor chapters, blocks and categories
 from 2026-01. 6D80.0 carries its real 2026-01 coding note ("This category
 should never be used in primary tabulation. ..."), copied verbatim when the
-fixture is built; 6D80.1 and 6D80.Z have none, as in 2026-01.
+fixture is built; 6D80.1 carries the same note; 6D80.Z has none, as in
+2026-01.
 
 `search-2025.txt`: the same rows in the 2025-01 format (17 columns, no
 CodingNote or Parent), stamp `Version:2025 Jan 24 - 22:30 UTC`.
