@@ -22,7 +22,7 @@ health nurses.
 - Start: `docker compose up -d`
 - Tests: `docker compose exec app php artisan test`
 - Import: `docker compose exec app php artisan icd:import 2026-01`
-- Search: `docker compose exec app php artisan icd:search "back pain"`
+- Search: `curl "http://localhost:8000/api/search?q=back+pain"`
 
 ## Reviewers
 

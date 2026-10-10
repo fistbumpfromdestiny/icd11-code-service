@@ -116,12 +116,3 @@ given.
 #### Scenario: Older release
 - **WHEN** both search fixtures are imported and release=2025-01 is given
 - **THEN** only 2025-01 entities are returned
-
-### Requirement: Search command
-The system SHALL provide `icd:search {query}` using the same search as the
-API.
-
-#### Scenario: Same order as the API
-- **WHEN** the search fixture is imported, `icd:search "back pain"` runs
-  and GET /api/search?q=back+pain is requested
-- **THEN** both list the same codes in the same order

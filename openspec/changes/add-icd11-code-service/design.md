@@ -5,8 +5,9 @@ See notes/data-findings.md for the verified facts about the WHO files.
 ## Import pipeline
 
 1. **ReleaseSource:** build the URL from the `release_url` template in
-   config/icd.php; download with `Http::timeout(60)->retry(2)->sink()` to
-   `storage/app/icd/{version}/release.zip`, or read `--file` (zip or
+   config/icd.php; download with `Http::timeout(60)->retry(3)->sink()`
+   (3 attempts: one try plus two retries, on a 5xx or a connection
+   error) to `storage/app/icd/{version}/release.zip`, or read `--file` (zip or
    extracted .txt, path inside the container; a missing path fails before
    any download); reuse a cached zip unless `--fresh`; check the zip
    signature (`PK\x03\x04`) and that ZipArchive can open it, deleting
@@ -138,7 +139,7 @@ a migration.
 
 ```
 app/
-  Console/Commands/{ImportIcdRelease,SearchIcd}.php
+  Console/Commands/ImportIcdRelease.php
   Icd/Import/{ReleaseSource,ReleaseReader,SchemaDetector,RowNormalizer,HierarchyBuilder,ReleaseImporter}.php
   Icd/Diff/{ReleaseDiffer,ChangeSet,EntitySnapshot}.php
   Icd/Search/{QueryClassifier,CodeSearch}.php

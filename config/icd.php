@@ -12,6 +12,18 @@ return [
     ),
 
     /*
+    | Where downloaded release files are kept, one folder per version. A local
+    | release file placed at {storage_path}/{version}/release.zip is used as if
+    | it had been downloaded.
+    */
+    'storage_path' => storage_path('app/icd'),
+
+    'download' => [
+        // Pause between the three download attempts; 0 in tests.
+        'retry_delay_ms' => (int) env('ICD_DOWNLOAD_RETRY_DELAY_MS', 1000),
+    ],
+
+    /*
     | Chapters kept at import. Strings, because ChapterNo is two digits with a
     | leading zero.
     */

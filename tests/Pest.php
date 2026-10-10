@@ -7,6 +7,9 @@ use App\Icd\Import\ReleaseReader;
 use App\Icd\Import\RowNormalizer;
 use App\Icd\Import\Schema;
 use App\Icd\Import\SchemaDetector;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 pest()->extend(TestCase::class)->in('Feature');
@@ -136,4 +139,83 @@ function diffSummary(iterable $changes): array
     }
 
     return $pairs;
+}
+
+/** The download URL for a version, built from release_url as the import builds it. */
+function icdReleaseUrl(string $version): string
+{
+    return str_replace('{version}', $version, config('icd.release_url'));
+}
+
+/** Zip bytes with the given entries. */
+function icdZipBytes(array $entries): string
+{
+    $dir = sys_get_temp_dir().'/icd-zip-'.bin2hex(random_bytes(6));
+    mkdir($dir);
+    $bytes = file_get_contents(makeIcdZip($dir, $entries));
+    File::deleteDirectory($dir);
+
+    return $bytes;
+}
+
+/** Zip bytes laid out like a WHO release: the fixture as the data .txt, plus any extra entries. */
+function icdFixtureZipBytes(string $fixture, array $extra = []): string
+{
+    return icdZipBytes(['SimpleTabulation-ICD-11-MMS-en.txt' => file_get_contents(icdFixture($fixture))] + $extra);
+}
+
+/** Fakes the WHO download for a version with zip bytes, or with an HTTP status. */
+function fakeWhoRelease(string $version, string|int $response): void
+{
+    Http::fake([icdReleaseUrl($version) => is_int($response)
+        ? Http::response('Synthetic error page', $response)
+        : Http::response($response, 200, ['Content-Type' => 'application/zip'])]);
+}
+
+/** Files under a directory, relative to it; [] when it does not exist. */
+function icdFilesIn(string $dir): array
+{
+    if (! is_dir($dir)) {
+        return [];
+    }
+
+    return array_map(fn ($file) => $file->getRelativePathname(), File::allFiles($dir));
+}
+
+/**
+ * Everything an import writes, without surrogate keys: releases, entities
+ * with their parent resolved through parent_id, and stored changes.
+ */
+function icdDatabaseState(): array
+{
+    $rows = fn ($query) => $query->get()->map(fn ($row) => (array) $row)->all();
+
+    return [
+        'releases' => $rows(DB::table('releases')->orderBy('version')
+            ->select('version', 'source_url', 'sha256', 'column_map', 'version_stamp')),
+        'entities' => $rows(DB::table('icd_entities as e')
+            ->join('releases as r', 'r.id', '=', 'e.release_id')
+            ->leftJoin('icd_entities as p', 'p.id', '=', 'e.parent_id')
+            ->orderBy('r.version')->orderBy('e.linearization_uri')
+            ->select('r.version', 'e.linearization_uri', 'e.foundation_uri', 'e.code', 'e.block_id', 'e.title',
+                'e.class_kind', 'e.chapter', 'e.depth', 'e.parent_uri', 'p.linearization_uri as parent_id_uri',
+                'e.is_leaf', 'e.is_residual', 'e.is_primary_tabulation', 'e.coding_note')),
+        'changes' => $rows(DB::table('release_changes as c')
+            ->join('releases as r', 'r.id', '=', 'c.release_id')
+            ->join('releases as pr', 'pr.id', '=', 'c.previous_release_id')
+            ->orderBy('r.version')->orderBy('c.change_type')->orderBy('c.linearization_uri')
+            ->select('r.version', 'pr.version as previous_version', 'c.change_type', 'c.linearization_uri', 'c.before', 'c.after')),
+    ];
+}
+
+/** Change types stored for a release, as [type, uri] pairs. */
+function icdStoredChanges(string $version): array
+{
+    return DB::table('release_changes as c')
+        ->join('releases as r', 'r.id', '=', 'c.release_id')
+        ->where('r.version', $version)
+        ->orderBy('c.id')
+        ->get(['c.change_type', 'c.linearization_uri'])
+        ->map(fn ($c) => [$c->change_type, $c->linearization_uri])
+        ->all();
 }

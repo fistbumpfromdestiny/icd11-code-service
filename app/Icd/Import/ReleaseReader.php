@@ -47,12 +47,66 @@ class ReleaseReader
      */
     public static function fromZip(string $path): self
     {
+        [$zip, $stream] = self::openDataEntry($path);
+
+        return new self($stream, $zip);
+    }
+
+    /** The sha256 of the data .txt, read from the zip without extracting it. */
+    public static function dataSha256(string $path, bool $isZip): string
+    {
+        if (! $isZip) {
+            return hash_file('sha256', $path);
+        }
+
+        [$zip, $stream] = self::openDataEntry($path);
+        $context = hash_init('sha256');
+        hash_update_stream($context, $stream);
+        fclose($stream);
+        $zip->close();
+
+        return hash_final($context);
+    }
+
+    /**
+     * Fails unless the zip holds exactly one data .txt. $label names the zip
+     * in the message; it defaults to the path.
+     */
+    public static function checkDataEntry(string $path, ?string $label = null): void
+    {
+        $zip = self::openZip($path);
+        self::dataEntry($zip, $label ?? $path);
+        $zip->close();
+    }
+
+    /** @return array{ZipArchive, resource} */
+    private static function openDataEntry(string $path): array
+    {
+        $zip = self::openZip($path);
+        $entry = self::dataEntry($zip, $path);
+        $stream = $zip->getStream($entry);
+
+        if ($stream === false) {
+            throw new ImportException("Cannot read {$entry} in {$path}.");
+        }
+
+        return [$zip, $stream];
+    }
+
+    private static function openZip(string $path): ZipArchive
+    {
         $zip = new ZipArchive;
 
         if ($zip->open($path, ZipArchive::RDONLY) !== true) {
             throw new ImportException("Cannot open {$path} as a zip file.");
         }
 
+        return $zip;
+    }
+
+    /** The only entry ending in .txt, readme.txt excluded. */
+    private static function dataEntry(ZipArchive $zip, string $label): string
+    {
         $candidates = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = $zip->getNameIndex($i);
@@ -63,20 +117,14 @@ class ReleaseReader
         }
 
         if ($candidates === []) {
-            throw new ImportException("{$path} contains no data .txt file.");
+            throw new ImportException("{$label} contains no data .txt file.");
         }
 
         if (count($candidates) > 1) {
-            throw new ImportException("{$path} contains several candidate data files: ".implode(', ', $candidates).'.');
+            throw new ImportException("{$label} contains several candidate data files: ".implode(', ', $candidates).'.');
         }
 
-        $stream = $zip->getStream($candidates[0]);
-
-        if ($stream === false) {
-            throw new ImportException("Cannot read {$candidates[0]} in {$path}.");
-        }
-
-        return new self($stream, $zip);
+        return $candidates[0];
     }
 
     /** @return list<string> */

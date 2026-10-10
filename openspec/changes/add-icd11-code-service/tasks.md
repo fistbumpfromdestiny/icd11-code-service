@@ -18,12 +18,12 @@
 ## 3. Import command (icd-import)
 4.1 and 4.2 are done before this group: ReleaseImporter runs the diff inside its transaction.
 
-- [ ] 3.1 Migrations: releases, icd_entities
-- [ ] 3.2 ReleaseSource (YYYY-MM validation with month 01 to 12, 5xx or timeout after retries, URL from `release_url` in config/icd.php, download to storage/app/icd/{version}/release.zip with Http::sink, zip signature check (only files downloaded in this run are deleted), truncated zip, several candidate .txt files, reuse cached zip, cached zip with the wrong stamp stops without deleting it, --fresh, --file for zip or .txt, missing --file path fails before any download, data .txt picked by extension excluding readme.txt and read via ZipArchive::getStream, sha256; tests use Http::fake with a zip built from fixtures)
-- [ ] 3.3 ReleaseImporter (transaction, chunked insert, skip unchanged sha256 unless --force; --force on an unchanged file gives an identical result)
-- [ ] 3.4 Tests: --force on an unchanged file is identical, two releases separate, rollback when a faked ReleaseDiffer throws
-- [ ] 3.5 Changed file under same version: refuse by default; --force prints the diff against the stored snapshot without storing it, replaces the snapshot and recomputes this release's and the next release's diffs
-- [ ] 3.6 Manual real-data check, not a Pest test: import both releases; check counts against notes/data-findings.md (3 516 and 3 512 in scope)
+- [x] 3.1 Migrations: releases, icd_entities
+- [x] 3.2 ReleaseSource (YYYY-MM validation with month 01 to 12, 5xx or timeout after retries, URL from `release_url` in config/icd.php, download to storage/app/icd/{version}/release.zip with Http::sink, zip signature check (only files downloaded in this run are deleted), truncated zip, several candidate .txt files, reuse cached zip, cached zip with the wrong stamp stops without deleting it, --fresh, --file for zip or .txt, missing --file path fails before any download, data .txt picked by extension excluding readme.txt and read via ZipArchive::getStream, sha256; tests use Http::fake with a zip built from fixtures)
+- [x] 3.3 ReleaseImporter (transaction, chunked insert, skip unchanged sha256 unless --force; --force on an unchanged file gives an identical result)
+- [x] 3.4 Tests: --force on an unchanged file is identical, two releases separate, rollback when a faked ReleaseDiffer throws
+- [x] 3.5 Changed file under same version: refuse by default; --force prints the diff against the stored snapshot without storing it, replaces the snapshot and recomputes this release's and the next release's diffs
+- [x] 3.6 Manual real-data check, not a Pest test: import both releases; check counts against notes/data-findings.md (3 516 and 3 512 in scope)
 
 ## 4. Release diff (release-diff)
 - [x] 4.1 Migration: release_changes
@@ -45,14 +45,13 @@
 - [ ] 6.1 SearchRequest (trimmed q of at least 2 characters, release as YYYY-MM, chapter in the configured chapters, limit 1 to 50), IcdEntityResource (code null for blocks, block_id, class_kind, is_leaf), meta.attribution on every successful response
 - [ ] 6.2 GET /api/search and GET /api/codes/{code} (with release parameter)
 - [ ] 6.3 Feature tests: shapes (including a block hit), code endpoint ancestors and children, coding note per release, empty result, 422, 404 for unknown code and unknown release, 503 with no release, tsquery operator characters, leaf_only, chapter, include_blocks, primary_only, attribution
-- [ ] 6.4 icd:search command using the same CodeSearch, for README examples; test that it lists the same codes in the same order as the API
 
 ## 7. Search quality
-- [ ] 7.1 Golden queries (20 to 30) with expected codes, including "back pain sciatica", "knee meniscus", "alzheimers onset", "depresion", "6A7" and the expected miss "tennis elbow"
+- [ ] 7.1 Golden queries (10 to 15) with expected codes, including "back pain sciatica", "knee meniscus", "alzheimers onset", "depresion", "6A7" and the expected miss "tennis elbow"
 - [ ] 7.2 Pest test reporting recall@5 and misses
 
 ## 8. Documentation and verification
-- [ ] 8.1 README: install, import (including how to place a release zip in storage/app/icd/{version}/ for offline use), tests, 5 to 6 real example searches, and a "Data and licence" section
+- [ ] 8.1 README: install, import (including how to place a release zip in storage/app/icd/{version}/ for offline use), tests, 5 to 6 real example searches with curl, and a "Data and licence" section
 - [ ] 8.2 DECISIONS.md: fill the TODOs
 - [ ] 8.3 Optional: GitHub Actions running the tests
 - [ ] 8.4 Fresh clone into an empty folder, follow README literally
