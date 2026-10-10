@@ -8,6 +8,12 @@ files; numbers below come from the files, not the readme.
 | 2025-01 | `Version:2025 Jan 24 - 22:30 UTC` | `7bc6b566394b8763efccda81f99f5ff0242b8c59d9cd230a90c3f38cba36992c` |
 | 2026-01 | `Version:2026 Jan 17 - 05:30 UTC` | `91b6e19048918b0f5cfb5ff56b16262c96e6e301214018f707d84dd6c775e93b` |
 
+## Download URL
+
+Both releases were downloaded from
+`https://icdcdn.who.int/static/releasefiles/{version}/SimpleTabulation-ICD-11-MMS-en.zip`,
+with `{version}` as `YYYY-MM` (e.g. `2026-01`).
+
 ## File format
 
 - Tab-separated, UTF-8 **with BOM**, **CRLF** line endings.

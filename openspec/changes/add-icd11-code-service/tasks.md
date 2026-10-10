@@ -4,9 +4,9 @@
 - [x] 0.3 Write notes/data-findings.md
 
 ## 1. Skeleton
-- [ ] 1.1 Laravel 13 on PHP 8.5 (zip and pdo_pgsql extensions, container runs as host user), Pest, Docker Compose with PostgreSQL 17
-- [ ] 1.2 .gitattributes (LF, fixtures marked -text), .env.example, config/icd.php (chapters, release_url, search.trigram_threshold), .gitignore for storage/app/icd/
-- [ ] 1.3 Test: database is PostgreSQL and pg_trgm is available
+- [x] 1.1 Laravel 13 on PHP 8.5 (zip and pdo_pgsql extensions, container runs as host user), Pest, Docker Compose with PostgreSQL 17
+- [x] 1.2 .gitattributes (LF, fixtures marked -text), .env.example, config/icd.php (chapters, release_url, search.trigram_threshold), .gitignore for storage/app/icd/
+- [x] 1.3 Test: database is PostgreSQL and pg_trgm is available
 
 ## 2. Reading and parsing (icd-import)
 - [ ] 2.1 Fixtures: 2025-01 header, 2026-01 header, a record broken by line breaks in CodingNote, an aliased header, an unknown extra column, no Version cell, a record with too many fields, a file ending inside a record, a Parent mismatch, a Grouping mismatch and a depth jump
