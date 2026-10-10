@@ -61,8 +61,9 @@ data column. Data rows have no value for it.
 
 ## Records spanning several lines (2026-01)
 
-`CodingNote` contains **unquoted line breaks**, typically two paragraphs
-separated by a blank line. Such a record spans three physical lines:
+`CodingNote` contains **unquoted line breaks**, most often two paragraphs
+separated by a blank line. Such a record spans between two and eleven
+physical lines, most often three:
 
 ```
 <18 fields ... first paragraph of CodingNote>
@@ -70,8 +71,26 @@ separated by a blank line. Such a record spans three physical lines:
 <rest of CodingNote>\t<Parent>
 ```
 
+- These line breaks are **bare LF** inside a file whose records end in
+  CRLF: 2026-01 has 37 053 CRLF and 100 bare LF in 50 records; 2025-01
+  has 0 bare LF. Splitting on CRLF alone would hide the problem; split on
+  LF and count fields.
+- No quoted field contains a tab or a line break, and no coding note
+  contains `"`.
 - 50 records in 2026-01 are affected; 157 in-scope rows have a coding note.
-- Reading line by line, or with `fgetcsv` alone, turns each into three
+- Physical lines per affected record:
+
+  | Lines | Records |
+  | --- | --- |
+  | 2 | 17 |
+  | 3 | 27 |
+  | 4 | 1 |
+  | 5 | 4 |
+  | 11 | 1 |
+
+  The 11-line record is a block whose note is a bulleted list ("This Block
+  includes the following:" followed by one `•` line per item).
+- Reading line by line, or with `fgetcsv` alone, turns each into several
   broken rows.
 - Fix: accumulate physical lines until the record has as many fields as the
   header (excluding the version stamp), then parse it as quoted TSV.

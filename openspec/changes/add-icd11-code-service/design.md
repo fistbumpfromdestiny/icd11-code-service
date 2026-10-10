@@ -13,11 +13,14 @@ See notes/data-findings.md for the verified facts about the WHO files.
    invalid files downloaded in this run; compute sha256 of the data file.
 2. **ReleaseReader:** open the zip with `ZipArchive`, pick the .txt by
    extension excluding readme.txt, read it with `getStream()` without
-   extracting; strip BOM, split on CRLF, reassemble records until the field
-   count matches the header (unquoted line breaks in CodingNote), parse each
-   record as quoted TSV, yield from a generator. A record with too many
-   fields, or end of file inside a record, fails with the physical line
-   number where the record starts.
+   extracting; strip BOM, split on every LF (records end in CRLF, while the
+   unquoted line breaks inside CodingNote are bare LF), reassemble records
+   until the field count matches the header, parse each record as quoted
+   TSV, yield from a generator. Line breaks inside a field are kept
+   byte-exact. A record with too many fields, a record still short of the
+   field count at a CRLF (only bare LF occurs inside a record), or end of
+   file inside a record, fails with the physical line number where the
+   record starts (every LF counts as a line; the header is line 1).
 3. **SchemaDetector:** map header names case-insensitively with aliases
    (see Columns below);
    ignore unknown columns and record them in the map; treat the `Version:`

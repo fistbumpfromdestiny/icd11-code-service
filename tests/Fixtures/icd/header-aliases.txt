@@ -1,0 +1,18 @@
+﻿Parent	CodingNote	Grouping5	Grouping4	Grouping3	Grouping2	Grouping1	Primary Tabulation	IsLeaf	BrowserLink	ChapterNo	IsResidual	DepthInKind	ClassKind	Title	BlockId	Code	Linearization (release) URI	Foundation URI	Version:2026 Jan 17 - 05:30 UTC
+								False	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-ch01"",""browser"")"	01	False	1	chapter	"Synthetic chapter outside scope"			http://id.who.int/icd/release/11/mms/synthetic/ch01	http://id.who.int/icd/entity/synthetic/ch01
+http://id.who.int/icd/entity/synthetic/ch01							True	True	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-zz03"",""browser"")"	01	False	1	category	"- Synthetic condition outside scope"		ZZ03	http://id.who.int/icd/release/11/mms/synthetic/zz03	http://id.who.int/icd/entity/synthetic/zz03
+								False	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-ch21"",""browser"")"	21	False	1	chapter	"Synthetic symptoms chapter"			http://id.who.int/icd/release/11/mms/synthetic/ch21	http://id.who.int/icd/entity/synthetic/ch21
+http://id.who.int/icd/entity/synthetic/ch21								False	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-blockzz0"",""browser"")"	21	False	1	block	"- Synthetic back pain conditions"	BlockL1-ZZ0		http://id.who.int/icd/release/11/mms/synthetic/blockzz0	http://id.who.int/icd/entity/synthetic/blockzz0
+http://id.who.int/icd/entity/synthetic/blockzz0	Synthetic coding note on one line.					BlockL1-ZZ0	True	False	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-zz01"",""browser"")"	21	False	1	category	"- - Synthetic back pain"		ZZ01	http://id.who.int/icd/release/11/mms/synthetic/zz01	http://id.who.int/icd/entity/synthetic/zz01
+http://id.who.int/icd/entity/synthetic/zz01	Synthetic first paragraph of a coding note.
+
+Synthetic second paragraph of a coding note.					BlockL1-ZZ0	True	True	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-zz01.0"",""browser"")"	21	False	2	category	"- - - Synthetic back pain, upper"		ZZ01.0	http://id.who.int/icd/release/11/mms/synthetic/zz01.0	http://id.who.int/icd/entity/synthetic/zz01.0
+http://id.who.int/icd/entity/synthetic/zz01						BlockL1-ZZ0	False	True	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-zz01-unspecified"",""browser"")"	21	True	2	category	"- - - Synthetic back pain, unspecified"		ZZ01.Z	http://id.who.int/icd/release/11/mms/synthetic/zz01/unspecified	
+http://id.who.int/icd/entity/synthetic/ch21	Synthetic block includes the following:
+• synthetic item one
+• synthetic item two
+• synthetic item three
+• synthetic item four
+• synthetic item five							False	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-blockzz1"",""browser"")"	21	False	1	block	"- Synthetic joint conditions"	BlockL1-ZZ1		http://id.who.int/icd/release/11/mms/synthetic/blockzz1	http://id.who.int/icd/entity/synthetic/blockzz1
+http://id.who.int/icd/entity/synthetic/blockzz1						BlockL1-ZZ1	True	True	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-zz02"",""browser"")"	21	False	1	category	"- - Synthetic shoulder pain"		ZZ02	http://id.who.int/icd/release/11/mms/synthetic/zz02	http://id.who.int/icd/entity/synthetic/zz02
+								False	"=hyperlink(""https://icd.who.int/browse/latestrelease/mms/en#synthetic-chx"",""browser"")"	X	False	1	chapter	"Synthetic extension codes"			http://id.who.int/icd/release/11/mms/synthetic/chx	http://id.who.int/icd/entity/synthetic/chx

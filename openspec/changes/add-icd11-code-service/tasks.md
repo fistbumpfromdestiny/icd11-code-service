@@ -9,11 +9,11 @@
 - [x] 1.3 Test: database is PostgreSQL and pg_trgm is available
 
 ## 2. Reading and parsing (icd-import)
-- [ ] 2.1 Fixtures: 2025-01 header, 2026-01 header, a record broken by line breaks in CodingNote, an aliased header, an unknown extra column, no Version cell, a record with too many fields, a file ending inside a record, a Parent mismatch, a Grouping mismatch and a depth jump
-- [ ] 2.2 ReleaseReader (zip to record generator, BOM, CRLF, record reassembly, quoted TSV, fail with the physical line number on too many fields or end of file inside a record)
-- [ ] 2.3 SchemaDetector (case-insensitive header map with aliases, unknown columns ignored and recorded in column_map, version stamp mapped to YYYY-MM, optional columns, fail on missing columns or missing Version cell)
-- [ ] 2.4 RowNormalizer and ChapterFilter
-- [ ] 2.5 HierarchyBuilder (depth from title prefix, parent_uri from stack; fail on a Parent or Grouping mismatch or a depth jump of more than one level)
+- [x] 2.1 Fixtures: 2025-01 header, 2026-01 header, a record broken by line breaks in CodingNote, an aliased header, an unknown extra column, no Version cell, a record with too many fields, a file ending inside a record, a Parent mismatch, a Grouping mismatch and a depth jump
+- [x] 2.2 ReleaseReader (zip to record generator, BOM, CRLF, record reassembly, quoted TSV, fail with the physical line number on too many fields or end of file inside a record)
+- [x] 2.3 SchemaDetector (case-insensitive header map with aliases, unknown columns ignored and recorded in column_map, version stamp mapped to YYYY-MM, optional columns, fail on missing columns or missing Version cell)
+- [x] 2.4 RowNormalizer and ChapterFilter
+- [x] 2.5 HierarchyBuilder (depth from title prefix, parent_uri from stack; fail on a Parent or Grouping mismatch or a depth jump of more than one level)
 
 ## 3. Import command (icd-import)
 - [ ] 3.1 Migrations: releases, icd_entities
