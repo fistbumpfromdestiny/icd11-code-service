@@ -47,8 +47,8 @@
 - [x] 6.3 Feature tests: shapes (including a block hit), code endpoint ancestors and children, coding note per release, empty result, 422, 404 for unknown code and unknown release, 503 with no release, tsquery operator characters, leaf_only, chapter, include_blocks, primary_only, attribution
 
 ## 7. Search quality
-- [ ] 7.1 Golden queries (10 to 15) with expected codes, including "back pain sciatica", "knee meniscus", "alzheimers onset", "depresion", "6A7" and the expected miss "tennis elbow"
-- [ ] 7.2 Pest test reporting recall@5 and misses
+- [x] 7.1 Golden queries (15 to 25) with expected codes, including "back pain sciatica", "knee meniscus", "alzheimers onset", "depresion", "6A7", the expected hit "tennis elbow" (through "elbow") and the expected miss "fibromialgia"
+- [x] 7.2 Pest test reporting recall@5 and misses
 
 ## 8. Documentation and verification
 - [ ] 8.1 README: install, import (including how to place a release zip in storage/app/icd/{version}/ for offline use), tests, 5 to 6 real example searches with curl, and a "Data and licence" section

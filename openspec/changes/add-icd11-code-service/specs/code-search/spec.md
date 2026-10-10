@@ -111,6 +111,29 @@ have no code).
   BlockL1-ZZ0, in that order
 - **THEN** the order is BlockL1-ZZ0, BlockL1-ZZ1
 
+### Requirement: Search quality
+The system SHALL be measured against a golden query set of 15 to 25
+queries run on the real 2026-01 release, reporting recall@5 for the
+expected hits. An expected hit missing from the top 5 SHALL fail the
+check; expected misses SHALL be reported and never fail.
+
+#### Scenario: Expected hit through one word
+- **WHEN** the real 2026-01 release is imported and the query is
+  "tennis elbow"
+- **THEN** FB55.1 Lateral epicondylitis of elbow is in the top 5, found
+  through "elbow" with matched_via partial
+
+#### Scenario: Expected miss
+- **WHEN** the real 2026-01 release is imported and the query is
+  "fibromialgia"
+- **THEN** a miss of MG30.01 Chronic widespread pain is reported and does
+  not fail the check, since the query shares no word with the title and no
+  synonyms exist in this version
+
+#### Scenario: Release file not present
+- **WHEN** storage/app/icd/2026-01/release.zip does not exist
+- **THEN** the golden check is skipped, never downloads and never fails
+
 ### Requirement: Chapters treated equally
 The system SHALL NOT rank by chapter, and SHALL return each hit's chapter.
 
