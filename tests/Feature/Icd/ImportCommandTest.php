@@ -475,7 +475,7 @@ it('replaces a changed file with --force, printing the same-version diff and rec
     $this->artisan('icd:import', ['version' => '2026-01', '--file' => icdFixture('diff-2026-01.txt'), '--force' => true])
         ->expectsOutputToContain('Changes against the stored 2026-01 snapshot (not stored)')
         ->expectsOutputToContain('removed ZZ01')
-        ->expectsOutputToContain('added ZZ10')
+        ->expectsOutputToContain('added (none) -> ZZ10')
         ->expectsOutputToContain('Recomputed the changes of 2027-01')
         ->assertSuccessful();
 
@@ -490,4 +490,83 @@ it('replaces a changed file with --force, printing the same-version diff and rec
             'code_reused' => 1, 'retitled' => 1, 'retitled_cosmetic' => 1,
         ])
         ->and(icdStoredChanges('2027-01'))->toBe([['retitled', SYNTHETIC_URI.'zz10']]);
+});
+
+// Import order (4.3)
+
+it('recomputes the newer diff when the older release is imported last, matching an in-order import', function () {
+    $this->artisan('icd:import', ['version' => '2025-01', '--file' => icdFixture('diff-2025-01.txt')])->assertSuccessful();
+    $this->artisan('icd:import', ['version' => '2026-01', '--file' => icdFixture('diff-2026-01.txt')])->assertSuccessful();
+    $inOrder = icdDatabaseState();
+    Release::query()->delete();
+
+    $this->artisan('icd:import', ['version' => '2026-01', '--file' => icdFixture('diff-2026-01.txt')])
+        ->expectsOutputToContain('nothing to compare against')
+        ->assertSuccessful();
+    $this->artisan('icd:import', ['version' => '2025-01', '--file' => icdFixture('diff-2025-01.txt')])
+        ->expectsOutputToContain('nothing to compare against')
+        ->expectsOutputToContain('Recomputed the changes of 2026-01 against 2025-01')
+        ->assertSuccessful();
+
+    expect(icdDatabaseState())->toBe($inOrder)
+        ->and($inOrder['changes'])->toHaveCount(7)
+        ->and(icdStoredChanges('2025-01'))->toBe([]);
+});
+
+it('diffs a release imported between two others against the older one and recomputes the newer one', function () {
+    $this->artisan('icd:import', ['version' => '2025-01', '--file' => icdFixture('diff-2025-01.txt')])->assertSuccessful();
+    $this->artisan('icd:import', ['version' => '2027-01', '--file' => icdFixture('diff-2027-01.txt')])->assertSuccessful();
+    expect(ReleaseChange::first()->previousRelease->version)->toBe('2025-01')
+        ->and(count(icdStoredChanges('2027-01')))->toBeGreaterThan(1);
+
+    [$exitCode, $output] = runIcdImport(['version' => '2026-01', '--file' => icdFixture('diff-2026-01.txt'), '--details' => true]);
+
+    $previousVersions = collect(icdDatabaseState()['changes'])->pluck('previous_version', 'version')->all();
+    expect($exitCode)->toBe(0)
+        ->and($output)
+        ->toContain('Changes against 2025-01')
+        ->toContain('Recomputed the changes of 2027-01 against 2026-01')
+        ->toContain('retitled ZZ10 "Synthetic unchanged condition" -> ZZ10 "Synthetic reworded condition"')
+        ->and($previousVersions)->toBe(['2026-01' => '2025-01', '2027-01' => '2026-01'])
+        ->and(icdStoredChanges('2026-01'))->toHaveCount(7)
+        ->and(icdStoredChanges('2027-01'))->toBe([['retitled', SYNTHETIC_URI.'zz10']]);
+});
+
+// Change report (4.4)
+
+it('prints a table of change counts per change type and chapter, without the list', function () {
+    $this->artisan('icd:import', ['version' => '2025-01', '--file' => icdFixture('diff-2025-01.txt')])->assertSuccessful();
+
+    $this->artisan('icd:import', ['version' => '2026-01', '--file' => icdFixture('diff-2026-01.txt')])
+        ->expectsOutputToContain('Changes against 2025-01')
+        ->expectsTable(['Change', '06', '15', '21', '24', 'Total'], array_map(
+            fn (string $type) => [$type, 0, 0, 1, 0, 1],
+            ['added', 'removed', 'recoded', 'moved', 'code_reused', 'retitled', 'retitled_cosmetic'],
+        ))
+        ->doesntExpectOutputToContain('Synthetic fasciitis and fibromatosis')
+        ->assertSuccessful();
+});
+
+it('highlights a reused code below the summary, naming both URIs', function () {
+    $this->artisan('icd:import', ['version' => '2025-01', '--file' => icdFixture('diff-2025-01.txt')])->assertSuccessful();
+
+    $this->artisan('icd:import', ['version' => '2026-01', '--file' => icdFixture('diff-2026-01.txt')])
+        ->expectsOutputToContain('Code ZZ11 now belongs to a different entity: '.SYNTHETIC_URI.'zz11 -> '.SYNTHETIC_URI.'zz19')
+        ->assertSuccessful();
+});
+
+it('lists every change with its code and title before and after with --details', function () {
+    $this->artisan('icd:import', ['version' => '2025-01', '--file' => icdFixture('diff-2025-01.txt')])->assertSuccessful();
+
+    [$exitCode, $output] = runIcdImport(['version' => '2026-01', '--file' => icdFixture('diff-2026-01.txt'), '--details' => true]);
+
+    expect($exitCode)->toBe(0)
+        ->and($output)
+        ->toContain('added (none) -> ZZ11 "Synthetic added condition"')
+        ->toContain('removed ZZ11 "Synthetic removed condition" -> (none)')
+        ->toContain('recoded ZZ12 "Synthetic recoded condition" -> ZZ17 "Synthetic recoded condition"')
+        ->toContain('moved ZZ13 "Synthetic moved condition" -> ZZ13 "Synthetic moved condition" (parent '.SYNTHETIC_URI.'blockzz0 -> '.SYNTHETIC_URI.'blockzz1)')
+        ->toContain('code_reused ZZ11 "Synthetic removed condition" ('.SYNTHETIC_URI.'zz11) -> ZZ11 "Synthetic added condition" ('.SYNTHETIC_URI.'zz19)')
+        ->toContain('retitled ZZ14 "Synthetic fasciitis and fibromatosis" -> ZZ14 "Synthetic fasciitis or fibromatosis"')
+        ->toContain('retitled_cosmetic ZZ15 "Synthetic Ketamine condition" -> ZZ15 "Synthetic ketamine condition"');
 });

@@ -28,9 +28,9 @@
 ## 4. Release diff (release-diff)
 - [x] 4.1 Migration: release_changes
 - [x] 4.2 ReleaseDiffer as a pure function, one test per change type (added, removed, recoded, moved, code_reused, retitled, retitled_cosmetic), several changes on one URI, leaving the configured chapters counts as removed; cosmetic rule (lowercase, non-alphanumerics to spaces, collapse whitespace); diff fixtures tests/Fixtures/icd/diff-2025-01.txt, diff-2026-01.txt and diff-2027-01.txt
-- [ ] 4.3 Previous-by-version logic, out-of-order test, release imported between two others recomputes the newer one's diff
-- [ ] 4.4 Console summary and --details
-- [ ] 4.5 Manual real-data check, not a Pest test: 2025-01 to 2026-01 run (expect 0 added, 4 removed, 0 recoded, 0 moved, 0 code_reused, 86 retitled, 2 retitled_cosmetic); save output for the README
+- [x] 4.3 Previous-by-version logic, out-of-order test, release imported between two others recomputes the newer one's diff
+- [x] 4.4 Console summary and --details
+- [x] 4.5 Manual real-data check, not a Pest test: 2025-01 to 2026-01 run (expect 0 added, 4 removed, 0 recoded, 0 moved, 0 code_reused, 86 retitled, 2 retitled_cosmetic); save output for the README
 
 ## 5. Search (code-search)
 - [ ] 5.1 Migrations: search_vector, GIN and trigram indexes, pg_trgm extension

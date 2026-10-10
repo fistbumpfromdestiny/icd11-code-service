@@ -32,4 +32,22 @@ final readonly class ChangeSet
 
         return $counts;
     }
+
+    /**
+     * Every change type, in order, with its counts per chapter. A change
+     * counts in the entity's chapter after it, or before it when removed.
+     *
+     * @return array<string, array<string, int>>
+     */
+    public function countsByTypeAndChapter(): array
+    {
+        $counts = array_fill_keys(array_map(fn (ChangeType $type) => $type->value, ChangeType::cases()), []);
+
+        foreach ($this->changes as $change) {
+            $chapter = ($change->after ?? $change->before)['chapter'];
+            $counts[$change->type->value][$chapter] = ($counts[$change->type->value][$chapter] ?? 0) + 1;
+        }
+
+        return $counts;
+    }
 }
