@@ -1,5 +1,6 @@
 <?php
 
+use App\Icd\Diff\EntitySnapshot;
 use App\Icd\Import\ChapterFilter;
 use App\Icd\Import\HierarchyBuilder;
 use App\Icd\Import\ReleaseReader;
@@ -93,4 +94,46 @@ function parseIcdFixture(string $name, array $chapters = ['06', '15', '21', '24'
     })();
 
     return (new HierarchyBuilder)->build((new ChapterFilter($chapters))->filter($rows), $schema);
+}
+
+/** @return array<string, EntitySnapshot> a fixture's in-scope rows as diff snapshots, keyed by URI */
+function icdSnapshots(string $name): array
+{
+    $snapshots = [];
+    foreach (parseIcdFixture($name) as $row) {
+        $snapshots[$row['linearization_uri']] = EntitySnapshot::fromArray($row);
+    }
+
+    return $snapshots;
+}
+
+/** A synthetic category snapshot; $key is the last URI segment. */
+function diffSnapshot(string $key, ?string $code, string $title, ?string $parent = 'blockzz0', string $chapter = '21', ?string $blockId = null, string $kind = 'category'): EntitySnapshot
+{
+    return EntitySnapshot::fromArray([
+        'linearization_uri' => SYNTHETIC_URI.$key,
+        'code' => $code,
+        'block_id' => $blockId,
+        'title' => $title,
+        'class_kind' => $kind,
+        'chapter' => $chapter,
+        'parent_uri' => $parent === null ? null : SYNTHETIC_URI.$parent,
+    ]);
+}
+
+/** @return array<string, EntitySnapshot> keyed by linearization URI */
+function diffSnapshots(EntitySnapshot ...$snapshots): array
+{
+    return array_column(array_map(fn ($s) => ['uri' => $s->linearizationUri, 's' => $s], $snapshots), 's', 'uri');
+}
+
+/** @return list<array{string, string}> [type, uri] pairs, in ChangeSet order */
+function diffSummary(iterable $changes): array
+{
+    $pairs = [];
+    foreach ($changes as $change) {
+        $pairs[] = [$change->type->value, $change->linearizationUri];
+    }
+
+    return $pairs;
 }

@@ -90,6 +90,8 @@ pure function over maps keyed by linearization URI.
   One URI can produce several records, one per type.
 - `code_reused`: the same code points to different URIs in the two
   releases. An entity leaving the configured chapters counts as removed.
+- A changed BlockId under the same URI is not reported; the data findings
+  show no such changes between 2025-01 and 2026-01.
 - Importing a release between two existing ones recomputes the diff of the
   next newer release.
 - `--force` under the same version prints the diff against the stored

@@ -16,6 +16,8 @@
 - [x] 2.5 HierarchyBuilder (depth from title prefix, parent_uri from stack; fail on a Parent or Grouping mismatch or a depth jump of more than one level)
 
 ## 3. Import command (icd-import)
+4.1 and 4.2 are done before this group: ReleaseImporter runs the diff inside its transaction.
+
 - [ ] 3.1 Migrations: releases, icd_entities
 - [ ] 3.2 ReleaseSource (YYYY-MM validation with month 01 to 12, 5xx or timeout after retries, URL from `release_url` in config/icd.php, download to storage/app/icd/{version}/release.zip with Http::sink, zip signature check (only files downloaded in this run are deleted), truncated zip, several candidate .txt files, reuse cached zip, cached zip with the wrong stamp stops without deleting it, --fresh, --file for zip or .txt, missing --file path fails before any download, data .txt picked by extension excluding readme.txt and read via ZipArchive::getStream, sha256; tests use Http::fake with a zip built from fixtures)
 - [ ] 3.3 ReleaseImporter (transaction, chunked insert, skip unchanged sha256 unless --force; --force on an unchanged file gives an identical result)
@@ -24,8 +26,8 @@
 - [ ] 3.6 Manual real-data check, not a Pest test: import both releases; check counts against notes/data-findings.md (3 516 and 3 512 in scope)
 
 ## 4. Release diff (release-diff)
-- [ ] 4.1 Migration: release_changes
-- [ ] 4.2 ReleaseDiffer as a pure function, one test per change type (added, removed, recoded, moved, code_reused, retitled, retitled_cosmetic), several changes on one URI, leaving the configured chapters counts as removed; cosmetic rule (lowercase, non-alphanumerics to spaces, collapse whitespace); diff fixtures tests/Fixtures/icd/diff-2025-01.txt, diff-2026-01.txt and diff-2027-01.txt
+- [x] 4.1 Migration: release_changes
+- [x] 4.2 ReleaseDiffer as a pure function, one test per change type (added, removed, recoded, moved, code_reused, retitled, retitled_cosmetic), several changes on one URI, leaving the configured chapters counts as removed; cosmetic rule (lowercase, non-alphanumerics to spaces, collapse whitespace); diff fixtures tests/Fixtures/icd/diff-2025-01.txt, diff-2026-01.txt and diff-2027-01.txt
 - [ ] 4.3 Previous-by-version logic, out-of-order test, release imported between two others recomputes the newer one's diff
 - [ ] 4.4 Console summary and --details
 - [ ] 4.5 Manual real-data check, not a Pest test: 2025-01 to 2026-01 run (expect 0 added, 4 removed, 0 recoded, 0 moved, 0 code_reused, 86 retitled, 2 retitled_cosmetic); save output for the README
