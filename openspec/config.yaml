@@ -1,0 +1,18 @@
+schema: spec-driven
+
+context: |
+  Laravel 13 on PHP 8.5, PostgreSQL 17 (full-text search, pg_trgm), Pest, Docker Compose.
+  Imports WHO ICD-11 MMS SimpleTabulation releases (chapters 06, 15, 21, 24) and serves a JSON search API for occupational health nurses.
+  Verified facts about the WHO files are in notes/data-findings.md. Never assume the file format.
+  Releases differ: 2026-01 adds CodingNote and Parent; CodingNote has unquoted line breaks; the readme is the same for both.
+  Identity across releases is the linearization URI, never the code. Residual categories have no foundation URI.
+  The tree comes from the "- " prefixes in the title, not DepthInKind; Parent and Grouping1-5 are cross-checks.
+  Tests run against PostgreSQL, never SQLite. No WHO release files in the repository.
+  WHO content is CC BY-ND 3.0 IGO: served unmodified, attributed in README and API responses.
+  No synonyms and no Swedish in this version.
+
+rules:
+  tasks:
+    - Each task group ends with green tests and one commit
+  specs:
+    - Every requirement has at least one scenario that maps to one Pest test
