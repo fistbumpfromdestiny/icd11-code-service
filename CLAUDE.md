@@ -52,15 +52,21 @@ health nurses.
 - Reassemble records by field count before parsing (CodingNote contains raw
   line breaks in 2026-01).
 - WHO titles and codes are stored and served unmodified, apart from
-  stripping the depth prefix.
+  technical normalisation: stripping the BOM, the depth prefix and
+  surrounding whitespace.
 - No synonyms in this version.
 - Domain logic lives in `app/Icd/{Import,Diff,Search}`. Commands and
   controllers stay thin.
-- No WHO release files in the repository. Fixtures are small synthetic
-  files. Tests never use the network; fake the WHO download with
-  `Http::fake()`.
+- No WHO release files in the repository. Fixtures are small. Search
+  fixtures may contain a handful of verbatim WHO rows (titles, URIs, flags
+  and coding notes copied exactly, never modified). Synthetic rows use `ZZ`
+  codes, "Synthetic" titles and the `.../mms/synthetic/` URI prefix. Never
+  whole release files, never real rows with altered content. Tests never
+  use the network; fake the WHO download with `Http::fake()`.
 - The container only sees the project folder. A local release file goes in
   `storage/app/icd/{version}/release.zip`.
 - The version argument is validated as `YYYY-MM` before it is used in a URL
   or path. Search input reaches SQL only through bound parameters.
 - No new dependencies without asking.
+- Never edit DECISIONS.md. Fredrik writes it. Suggest changes in chat
+  instead.

@@ -92,6 +92,24 @@ separated by a blank line. Such a record spans three physical lines:
   chapters. Parents derived from title depth match it with **zero
   mismatches** in chapters 06, 15, 21, 24. Use it as a cross-check; 2025-01
   has no such column.
+- `Grouping1`-`Grouping5` contain **block ids** (e.g. `BlockL1-6A0`), not
+  URIs or titles. They match the block ancestors derived from title depth
+  with **zero mismatches** in both releases.
+- Blocks never list their own `BlockId` in Grouping1-5 (0 of 132 blocks in
+  both releases); Grouping holds only ancestor blocks.
+- Title depth never jumps by more than one level from one row to the next
+  in either release.
+- 70.8% of parent links in scope are category under category in both
+  releases (2 485 of 3 512 in 2025-01, 2 484 of 3 508 in 2026-01).
+
+## Codes
+
+- All codes in both files are upper case.
+
+## Primary tabulation
+
+- 212 in-scope categories have `Primary tabulation` = `False` in both
+  releases.
 
 ## Size
 
@@ -140,7 +158,12 @@ Retitles:
 
 - 48 only change "and" to "or", e.g. FB51.2 "Fasciitis and fibromatosis"
   to "Fasciitis or fibromatosis".
-- 2 only change case, e.g. "Ketamine" to "ketamine".
+- 2 only change case: 6C4D.5 and 6C4D.61, "Ketamine" to "ketamine".
+- Cosmetic rule: two titles are cosmetic when equal after lowercasing,
+  replacing every character that is not a letter or digit with a space,
+  and collapsing whitespace. Under this rule the 88 split into 86
+  `retitled` (the "and" to "or" changes are substantive) and 2
+  `retitled_cosmetic` (the two above).
 - 38 are real rewordings, e.g.:
   - QB95.4 "Psychotherapy" to "Contact with health services for care
     involving use of psychotherapy" (the whole QB95 family follows this
@@ -154,6 +177,17 @@ Retitles:
   - MG51.2Z "Enteroccus resistant to unspecified antibiotic" to "Enterococcus
     resistant to unspecified antibiotic"
 
+Title lengths used by the search scenarios: 6D80.1 has 49 characters,
+6D80.0 has 50 and 6D80.Z has 63.
+
+Rows used by the search fixtures:
+
+- ME84.2 has `Primary tabulation` = `True` in both releases.
+- All 6D80 codes have `Primary tabulation` = `False` in 2026-01. 6D80.0
+  has the coding note "This category should never be used in primary
+  tabulation. ..."; 6D80.Z is residual and has no note.
+- 6A70 has no coding note in 2026-01.
+
 No changes to `isLeaf`, `IsResidual`, `Primary tabulation`, groupings,
 `BlockId` or `ClassKind` on entities present in both releases.
 
@@ -166,7 +200,7 @@ No changes to `isLeaf`, `IsResidual`, `Primary tabulation`, groupings,
 - Reassemble records by field count before parsing.
 - Strip BOM, handle CRLF, parse quoted TSV.
 - Depth from the title prefix; parent from a depth stack; cross-check
-  against `Parent` when present.
+  against `Parent` when present and against the block ids in Grouping1-5.
 - `foundation_uri` is nullable.
 - Report cosmetic retitles (case, punctuation) separately from real
   rewordings.

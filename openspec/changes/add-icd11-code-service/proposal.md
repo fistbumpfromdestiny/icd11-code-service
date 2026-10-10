@@ -17,8 +17,7 @@ problems, from the words they actually type.
 - Search over local data combining code lookup, English full-text search
   with ancestor context, a partial-match fallback and typo-tolerant trigram
   matching, ranked in tiers and explained per hit.
-- JSON API: free-text search (required) and code lookup; release listing and
-  change listing as optional additions.
+- JSON API: free-text search and code lookup.
 
 ## Impact
 - Affected specs: icd-import, release-diff, code-search, search-api (all new)
