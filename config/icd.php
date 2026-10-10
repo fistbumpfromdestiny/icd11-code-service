@@ -30,8 +30,14 @@ return [
     'chapters' => ['06', '15', '21', '24'],
 
     'search' => [
-        // Provisional; chosen against real queries in task 5.7.
+        // 0.4 measured against ten misspellings on 2026-01: 0.3 adds noise, 0.5 loses alzhiemer.
         'trigram_threshold' => 0.4,
     ],
+
+    /*
+    | WHO attribution, sent as meta.attribution on every successful API
+    | response (CC BY-ND 3.0 IGO).
+    */
+    'attribution' => 'ICD-11 for Mortality and Morbidity Statistics (ICD-11 MMS), World Health Organization (WHO), https://icd.who.int/. Licensed under CC BY-ND 3.0 IGO, https://creativecommons.org/licenses/by-nd/3.0/igo/.',
 
 ];

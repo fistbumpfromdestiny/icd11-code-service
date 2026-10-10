@@ -37,6 +37,21 @@ it('breaks equal scores by primary coding, specificity, title length, then code'
     expect(sortedCodes($hits))->toBe(['E', 'Q1', 'Q2', 'B', 'A']);
 });
 
+it('breaks a tie between blocks by block_id', function () {
+    $block = fn (string $blockId) => new SearchHit((new IcdEntity)->forceFill([
+        'code' => null,
+        'block_id' => $blockId,
+        'title' => 'Synthetic block',
+        'is_primary_tabulation' => null,
+        'is_residual' => false,
+    ]), MatchedVia::Title, 1);
+
+    $hits = [$block('BlockL1-ZZ1'), $block('BlockL1-ZZ0')];
+    usort($hits, HitComparator::compare(...));
+
+    expect(array_map(fn (SearchHit $hit) => $hit->entity->block_id, $hits))->toBe(['BlockL1-ZZ0', 'BlockL1-ZZ1']);
+});
+
 it('puts a higher score first within a tier', function () {
     $hits = [
         comparatorHit('ZZ01', score: 0.2, titleLength: 10),

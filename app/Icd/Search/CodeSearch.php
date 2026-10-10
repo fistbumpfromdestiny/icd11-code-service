@@ -7,10 +7,11 @@ use App\Models\Release;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Searches the categories of one release in tiers: code, title (all words),
- * partial (some words), fuzzy. Each entity is returned once, with its best
- * tier. Each tier fetches all its matches, so ties are decided by
- * HitComparator rather than by SQL.
+ * Searches one release (categories by default, see SearchFilters) in tiers:
+ * code, title (all words), partial (some words), fuzzy. Each entity is
+ * returned once, with its best tier. The fuzzy tier runs only when the
+ * others found nothing. Each tier fetches all its matches, so ties are
+ * decided by HitComparator rather than by SQL.
  *
  * User input reaches SQL only as bound parameters, and free-text words
  * contain only letters and digits (see QueryClassifier).
@@ -20,21 +21,23 @@ class CodeSearch
     public function __construct(private QueryClassifier $classifier) {}
 
     /** @return list<SearchHit> */
-    public function search(string $query, Release $release, int $limit = 10): array
+    public function search(string $query, Release $release, int $limit = 10, SearchFilters $filters = new SearchFilters): array
     {
         $classified = $this->classifier->classify($query);
+        $scope = $this->scope($release, $filters);
+        $fuzzy = null;
 
         if ($classified->isCode) {
-            $tiers = [fn () => $this->byCode($classified->code, $release)];
+            $tiers = [fn () => $this->byCode($classified->code, $scope)];
         } elseif ($classified->words === []) {
             return [];
         } else {
             $words = $classified->words;
             $tiers = [
-                fn () => $this->byAllWords($words, $release),
-                fn () => count($words) > 1 ? $this->bySomeWords($words, $release) : [],
-                fn () => $this->byTrigram(implode(' ', $words), $release),
+                fn () => $this->byAllWords($words, $scope),
+                fn () => count($words) > 1 ? $this->bySomeWords($words, $scope) : [],
             ];
+            $fuzzy = fn () => $this->byTrigram(implode(' ', $words), $scope);
         }
 
         /** @var array<int, SearchHit> $hits keyed by entity id; the first (best) tier wins */
@@ -48,20 +51,46 @@ class CodeSearch
             }
         }
 
+        // Close matches only when nothing else matched, so they never pad
+        // out real matches ("pain" is close to "partial").
+        if ($hits === [] && $fuzzy !== null) {
+            foreach ($fuzzy() as $hit) {
+                $hits[$hit->entity->id] = $hit;
+            }
+        }
+
         $hits = array_values($hits);
         usort($hits, HitComparator::compare(...));
 
         return array_slice($hits, 0, $limit);
     }
 
-    /** @return list<SearchHit> exact code scores 1, a longer code with the prefix 0 */
-    private function byCode(string $code, Release $release): array
+    /**
+     * The release and the filters, as a condition on alias `e` with its
+     * bindings.
+     *
+     * @return array{string, list<mixed>}
+     */
+    private function scope(Release $release, SearchFilters $filters): array
     {
+        [$sql, $bindings] = $filters->sql();
+
+        return ["e.release_id = ? and {$sql}", [$release->id, ...$bindings]];
+    }
+
+    /**
+     * @param  array{string, list<mixed>}  $scope
+     * @return list<SearchHit> exact code scores 1, a longer code with the prefix 0
+     */
+    private function byCode(string $code, array $scope): array
+    {
+        [$where, $scopeBindings] = $scope;
+
         return $this->hits(MatchedVia::Code,
             "select e.*, (e.code = ?)::int as score
              from icd_entities as e
-             where e.release_id = ? and e.class_kind = 'category' and e.code like ?",
-            [$code, $release->id, $code.'%'],
+             where {$where} and e.code like ?",
+            [$code, ...$scopeBindings, $code.'%'],
         );
     }
 
@@ -71,9 +100,11 @@ class CodeSearch
      * the same way tie and HitComparator decides.
      *
      * @param  list<string>  $words
+     * @param  array{string, list<mixed>}  $scope
      */
-    private function byAllWords(array $words, Release $release): array
+    private function byAllWords(array $words, array $scope): array
     {
+        [$where, $scopeBindings] = $scope;
         [$sql, $bindings] = $this->terms($words);
         $query = '('.implode(' && ', $sql).')';
         $terms = 'array['.implode(', ', $sql).']';
@@ -81,14 +112,20 @@ class CodeSearch
         return $this->hits(MatchedVia::Title,
             "select e.*, (select count(*) from unnest(q.terms) as u(term) where ts_filter(e.search_vector, '{a}') @@ u.term) as score
              from icd_entities as e, (select {$query} as query, {$terms} as terms) as q
-             where e.release_id = ? and e.class_kind = 'category' and e.search_vector @@ q.query",
-            [...$bindings, ...$bindings, $release->id],
+             where {$where} and e.search_vector @@ q.query",
+            [...$bindings, ...$bindings, ...$scopeBindings],
         );
     }
 
-    /** @param list<string> $words score is the number of words that match */
-    private function bySomeWords(array $words, Release $release): array
+    /**
+     * Score is the number of words that match.
+     *
+     * @param  list<string>  $words
+     * @param  array{string, list<mixed>}  $scope
+     */
+    private function bySomeWords(array $words, array $scope): array
     {
+        [$where, $scopeBindings] = $scope;
         [$sql, $bindings] = $this->terms($words);
         $terms = 'array['.implode(', ', $sql).']';
 
@@ -96,25 +133,31 @@ class CodeSearch
             "select * from (
                  select e.*, (select count(*) from unnest(t.terms) as u(term) where e.search_vector @@ u.term) as score
                  from icd_entities as e, (select {$terms} as terms) as t
-                 where e.release_id = ? and e.class_kind = 'category'
+                 where {$where}
              ) as matched
              where score > 0",
-            [...$bindings, $release->id],
+            [...$bindings, ...$scopeBindings],
         );
     }
 
-    /** pg_trgm word similarity above the configured threshold; `<%` uses the trigram index. */
-    private function byTrigram(string $text, Release $release): array
+    /**
+     * pg_trgm word similarity above the configured threshold; `<%` uses the trigram index.
+     *
+     * @param  array{string, list<mixed>}  $scope
+     */
+    private function byTrigram(string $text, array $scope): array
     {
-        return DB::transaction(function () use ($text, $release) {
+        [$where, $scopeBindings] = $scope;
+
+        return DB::transaction(function () use ($text, $where, $scopeBindings) {
             DB::select("select set_config('pg_trgm.word_similarity_threshold', ?, true)",
                 [(string) config('icd.search.trigram_threshold')]);
 
             return $this->hits(MatchedVia::Fuzzy,
                 "select e.*, word_similarity(?, e.title) as score
                  from icd_entities as e
-                 where e.release_id = ? and e.class_kind = 'category' and ? <% e.title",
-                [$text, $release->id, $text],
+                 where {$where} and ? <% e.title",
+                [$text, ...$scopeBindings, $text],
             );
         });
     }

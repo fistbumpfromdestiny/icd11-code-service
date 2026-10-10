@@ -38,13 +38,13 @@
 - [x] 5.3 Fixtures tests/Fixtures/icd/search.txt and search-2025.txt with the rows listed in design.md (real rows and 6D80.0's coding note copied verbatim from the releases)
 - [x] 5.4 QueryClassifier (normalization, code detection, code queries upper-cased)
 - [x] 5.5 CodeSearch: code, all-words full-text with partial last word, some-words fallback, trigram above the fixed `search.trigram_threshold` in config/icd.php; tiers, exact code first, tie-break comparator as a pure function tested over five synthetic hits, dedupe, matched_via
-- [ ] 5.6 Release selection: latest imported release by default, release parameter, 404 for an unknown release, 503 when none is imported
-- [ ] 5.7 Choose the trigram_threshold value against real queries; note ranking decisions
+- [x] 5.6 Release selection: latest imported release by default, release parameter, 404 for an unknown release, 503 when none is imported
+- [x] 5.7 Choose the trigram_threshold value against real queries; note ranking decisions
 
 ## 6. API (search-api)
-- [ ] 6.1 SearchRequest (trimmed q of at least 2 characters, release as YYYY-MM, chapter in the configured chapters, limit 1 to 50), IcdEntityResource (code null for blocks, block_id, class_kind, is_leaf), meta.attribution on every successful response
-- [ ] 6.2 GET /api/search and GET /api/codes/{code} (with release parameter)
-- [ ] 6.3 Feature tests: shapes (including a block hit), code endpoint ancestors and children, coding note per release, empty result, 422, 404 for unknown code and unknown release, 503 with no release, tsquery operator characters, leaf_only, chapter, include_blocks, primary_only, attribution
+- [x] 6.1 SearchRequest (trimmed q of at least 2 characters, release as YYYY-MM, chapter in the configured chapters, limit 1 to 50), IcdEntityResource (code null for blocks, block_id, class_kind, is_leaf), meta.attribution on every successful response
+- [x] 6.2 GET /api/search and GET /api/codes/{code} (with release parameter)
+- [x] 6.3 Feature tests: shapes (including a block hit), code endpoint ancestors and children, coding note per release, empty result, 422, 404 for unknown code and unknown release, 503 with no release, tsquery operator characters, leaf_only, chapter, include_blocks, primary_only, attribution
 
 ## 7. Search quality
 - [ ] 7.1 Golden queries (10 to 15) with expected codes, including "back pain sciatica", "knee meniscus", "alzheimers onset", "depresion", "6A7" and the expected miss "tennis elbow"

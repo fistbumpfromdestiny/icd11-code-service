@@ -16,6 +16,9 @@ use ZipArchive;
  */
 class ReleaseSource
 {
+    /** A release version: YYYY-MM with a month from 01 to 12. */
+    public const VERSION_PATTERN = '/\A\d{4}-(0[1-9]|1[0-2])\z/';
+
     private const ZIP_SIGNATURE = "PK\x03\x04";
 
     private const DOWNLOAD_ATTEMPTS = 3;
@@ -24,7 +27,7 @@ class ReleaseSource
 
     public static function validateVersion(string $version): void
     {
-        if (! preg_match('/\A\d{4}-(0[1-9]|1[0-2])\z/', $version)) {
+        if (! preg_match(self::VERSION_PATTERN, $version)) {
             throw new ImportException("Invalid version \"{$version}\": expected YYYY-MM with a month from 01 to 12, e.g. 2026-01.");
         }
     }

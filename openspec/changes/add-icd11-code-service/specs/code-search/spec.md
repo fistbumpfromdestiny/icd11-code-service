@@ -73,18 +73,26 @@ results matching some of the words, ranked by how many match.
 ### Requirement: Typo tolerance
 The system SHALL return close matches for misspelled queries, using
 `pg_trgm` word similarity above the fixed `search.trigram_threshold` in
-config/icd.php.
+config/icd.php. Close matches SHALL be searched only when the code, title
+and partial tiers found nothing, so they never pad out real matches.
 
 #### Scenario: Misspelling
 - **WHEN** the search fixture is imported and the query is "depresion"
 - **THEN** 6A70 is in the top 5 with matched_via fuzzy
+
+#### Scenario: No close matches next to real matches
+- **WHEN** the search fixture is imported and the query is "pain", with
+  and without chapter 15
+- **THEN** no hit has matched_via fuzzy (without the chapter, the 6A7
+  "... partial remission" titles would otherwise be fuzzy hits)
 
 ### Requirement: Ranking and explanation
 The system SHALL rank code > full-text (all words) > full-text (some words)
 > fuzzy, return each entity once with its best match, and state how each
 hit matched. Within the full-text and fuzzy tiers, hits with equal score
 SHALL be ordered by primary coding before supplementary, specific before
-residual, shorter title, then code ascending.
+residual, shorter title, code ascending, then block_id ascending (blocks
+have no code).
 
 #### Scenario: Deduplicated
 - **WHEN** the search fixture is imported and the query is "depressive"
@@ -96,6 +104,12 @@ residual, shorter title, then code ascending.
   title length 20, code Q2), D (primary, specific, title length 20, code
   Q1) and E (primary, specific, title length 10)
 - **THEN** the order is E, D, C, B, A
+
+#### Scenario: Tie-break between blocks
+- **WHEN** the tie-break comparator is given two blocks (code null) with
+  equal tier, score, flags and title length, block ids BlockL1-ZZ1 and
+  BlockL1-ZZ0, in that order
+- **THEN** the order is BlockL1-ZZ0, BlockL1-ZZ1
 
 ### Requirement: Chapters treated equally
 The system SHALL NOT rank by chapter, and SHALL return each hit's chapter.

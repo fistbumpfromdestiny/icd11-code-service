@@ -2,10 +2,13 @@
 
 use App\Icd\Search\CodeSearch;
 use App\Icd\Search\MatchedVia;
+use App\Icd\Search\NoReleaseImportedException;
+use App\Icd\Search\ReleaseSelector;
+use App\Icd\Search\SearchFilters;
 use App\Icd\Search\SearchHit;
+use App\Icd\Search\UnknownReleaseException;
 use App\Models\Release;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
@@ -14,13 +17,6 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     Http::preventStrayRequests();
 });
-
-function importSearchFixture(string $version = '2026-01', string $fixture = 'search.txt'): Release
-{
-    expect(Artisan::call('icd:import', ['version' => $version, '--file' => icdFixture($fixture)]))->toBe(0);
-
-    return Release::where('version', $version)->firstOrFail();
-}
 
 /** @return list<SearchHit> */
 function searchFixture(string $query, int $limit = 10): array
@@ -221,6 +217,17 @@ it('applies the configured trigram threshold', function () {
     expect(array_filter($hits, fn (SearchHit $hit) => $hit->matchedVia === MatchedVia::Fuzzy))->toBe([]);
 });
 
+it('searches close matches only when nothing else matched', function (?string $chapter) {
+    $release = importSearchFixture();
+
+    // Without the chapter, "pain" is close to "partial" in the 6A7 "... in
+    // partial remission" titles.
+    $hits = app(CodeSearch::class)->search('pain', $release, filters: new SearchFilters(chapter: $chapter));
+
+    expect($hits)->not->toBeEmpty()
+        ->and(array_map(fn (SearchHit $hit) => $hit->matchedVia, $hits))->not->toContain(MatchedVia::Fuzzy);
+})->with(['chapter 15' => '15', 'any chapter' => null]);
+
 // Ranking and explanation
 
 it('returns each entity once with its best match', function () {
@@ -251,3 +258,37 @@ it('never passes operator characters to PostgreSQL', function (string $query) {
 
     expect(searchFixture($query))->toBeArray();
 })->with(['back & (pain !', "'depr':* | !x <-> y", '&| !:*', 'pain with', 'with']);
+
+// Release selection (5.6)
+
+it('searches the latest imported release by default', function () {
+    $latest = importSearchFixture();
+    importSearchFixture('2025-01', 'search-2025.txt'); // imported last, still not the latest
+
+    $release = app(ReleaseSelector::class)->select(null);
+    $hits = app(CodeSearch::class)->search('back pain', $release);
+
+    expect($release->id)->toBe($latest->id)
+        ->and($hits)->not->toBeEmpty()
+        ->and(array_map(fn (SearchHit $hit) => $hit->entity->release_id, $hits))->each->toBe($latest->id);
+});
+
+it('searches an older release when it is given', function () {
+    $old = importSearchFixture('2025-01', 'search-2025.txt');
+    importSearchFixture();
+
+    $hits = app(CodeSearch::class)->search('back pain', app(ReleaseSelector::class)->select('2025-01'));
+
+    expect($hits)->not->toBeEmpty()
+        ->and(array_map(fn (SearchHit $hit) => $hit->entity->release_id, $hits))->each->toBe($old->id);
+});
+
+it('rejects a release that is not imported', function () {
+    importSearchFixture();
+
+    app(ReleaseSelector::class)->select('2030-01');
+})->throws(UnknownReleaseException::class, 'Release 2030-01 is not imported.');
+
+it('fails when no release is imported', function () {
+    app(ReleaseSelector::class)->select(null);
+})->throws(NoReleaseImportedException::class, 'No ICD release imported');

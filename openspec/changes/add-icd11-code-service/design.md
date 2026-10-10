@@ -107,13 +107,15 @@ pure function over maps keyed by linearization URI.
 2. **Strategies:** exact/prefix code; full-text over a weighted vector (own
    title weight A, ancestor titles weight C), all words required, prefix
    match on the last word; if fewer results than the limit, a fallback where
-   any word may match, ranked by how many match; `pg_trgm` word similarity
-   above the fixed `search.trigram_threshold` in config/icd.php for typos.
+   any word may match, ranked by how many match; only if the code, title
+   and partial tiers found nothing, `pg_trgm` word similarity above the
+   fixed `search.trigram_threshold` in config/icd.php for typos.
 3. **Tiers:** code > full-text (all words) > full-text (some words) > trigram.
 4. **Order within a tier:** the code tier puts an exact match first, then
    code order. In the full-text and fuzzy tiers, equal scores are broken by
    primary coding before supplementary, specific before residual, shorter
-   title, then code; this comparator is a pure function.
+   title, code, then block_id (blocks have no code); this comparator is a
+   pure function.
 5. **Deduplicate by entity**, keep the best tier, apply limit.
 6. **Explain:** `matched_via` is `code`, `title`, `partial` or `fuzzy`.
 7. **Release:** the latest imported release unless `release` is given; an

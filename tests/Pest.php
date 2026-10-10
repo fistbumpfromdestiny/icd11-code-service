@@ -7,6 +7,8 @@ use App\Icd\Import\ReleaseReader;
 use App\Icd\Import\RowNormalizer;
 use App\Icd\Import\Schema;
 use App\Icd\Import\SchemaDetector;
+use App\Models\Release;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -20,6 +22,14 @@ const SYNTHETIC_URI = 'http://id.who.int/icd/release/11/mms/synthetic/';
 function icdFixture(string $name): string
 {
     return __DIR__.'/Fixtures/icd/'.$name;
+}
+
+/** Imports a search fixture with icd:import and returns its release. */
+function importSearchFixture(string $version = '2026-01', string $fixture = 'search.txt'): Release
+{
+    expect(Artisan::call('icd:import', ['version' => $version, '--file' => icdFixture($fixture)]))->toBe(0);
+
+    return Release::where('version', $version)->firstOrFail();
 }
 
 /** @return array<int, list<string>> records keyed by their start line */
