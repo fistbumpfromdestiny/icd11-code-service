@@ -6,8 +6,11 @@ health nurses.
 
 ## Where things are
 
-- `openspec/changes/add-icd11-code-service/`: proposal, design, specs and
-  tasks. The specs are the source of truth for behaviour.
+- `openspec/specs/`: the main specs (icd-import, release-diff, code-search,
+  search-api). The source of truth for behaviour.
+- `openspec/changes/archive/2026-10-11-add-icd11-code-service/`: the
+  archived first change (proposal, design, tasks). New work goes in a new
+  change under `openspec/changes/`.
 - `notes/data-findings.md`: verified facts about the WHO files. Read it
   before touching the import. Never guess the file format.
 - `DECISIONS.md`: the choices and why. Keep it short.

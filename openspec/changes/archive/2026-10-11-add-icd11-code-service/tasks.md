@@ -53,5 +53,5 @@
 ## 8. Documentation and verification
 - [x] 8.1 README: install, import (including how to place a release zip in storage/app/icd/{version}/ for offline use), tests, 5 to 6 real example searches with curl, and a "Data and licence" section
 - [x] 8.2 DECISIONS.md: fill the TODOs
-- [ ] 8.3 Optional: GitHub Actions running the tests
+- [x] ~~8.3 Optional: GitHub Actions running the tests~~ (skipped)
 - [x] 8.4 Fresh clone into an empty folder, follow README literally

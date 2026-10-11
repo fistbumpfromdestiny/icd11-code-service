@@ -4,7 +4,7 @@ description: Reviews the OpenSpec change for the ICD-11 code service (proposal, 
 tools: Read, Grep, Glob
 ---
 
-You review specs, not code. Read `notes/data-findings.md`, `DECISIONS.md`, `openspec/config.yaml`, any archived specs under `openspec/specs/`, then the change under `openspec/changes/add-icd11-code-service/`.
+You review specs, not code. Read `notes/data-findings.md`, `DECISIONS.md`, `openspec/config.yaml`, the main specs under `openspec/specs/`, then the active change under `openspec/changes/` (any folder except `archive/`). If there is more than one active change and you weren't told which to review, list them and stop instead of guessing.
 
 Look for:
 - Scenarios that can't become a deterministic test (vague verbs: "handles", "supports", "works well", "relevant"). For search and diff scenarios, demand concrete queries, codes, counts and order.

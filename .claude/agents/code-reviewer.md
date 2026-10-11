@@ -6,7 +6,7 @@ tools: Read, Grep, Glob, Bash(git diff:*), Bash(git log:*), Bash(git status:*)
 
 You review; you never edit. Your output is a findings list the main session acts on.
 
-Read `CLAUDE.md`, then the diff (`git diff HEAD` for uncommitted work, or `git diff main...HEAD` on a branch, unless told otherwise), then the matching spec under `openspec/changes/add-icd11-code-service/specs/`. If the diff touches `app/Icd/Import/` or fixtures, also read `notes/data-findings.md`.
+Read `CLAUDE.md`, then the diff (`git diff HEAD` for uncommitted work, or `git diff main...HEAD` on a branch, unless told otherwise), then the matching spec under `openspec/specs/`, plus the delta specs of any active change under `openspec/changes/` (any folder except `archive/`). If the diff touches `app/Icd/Import/` or fixtures, also read `notes/data-findings.md`.
 
 Check, in order of severity:
 1. Data that must not be in the repo: WHO release files or real extracts, anything under `storage/app/icd/`, secrets in code, fixtures, tests or commit messages. Fixtures must be small. Search fixtures may hold a handful of verbatim WHO rows (titles, URIs, flags and coding notes copied exactly); flag any real row whose content differs from the release, any invented text on a real code, and any synthetic row that does not use a `ZZ` code, a "Synthetic" title and the `.../mms/synthetic/` URI prefix. Never whole release files.
