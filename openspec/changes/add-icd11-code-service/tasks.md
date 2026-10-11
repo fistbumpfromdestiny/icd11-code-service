@@ -51,7 +51,7 @@
 - [x] 7.2 Pest test reporting recall@5 and misses
 
 ## 8. Documentation and verification
-- [ ] 8.1 README: install, import (including how to place a release zip in storage/app/icd/{version}/ for offline use), tests, 5 to 6 real example searches with curl, and a "Data and licence" section
-- [ ] 8.2 DECISIONS.md: fill the TODOs
+- [x] 8.1 README: install, import (including how to place a release zip in storage/app/icd/{version}/ for offline use), tests, 5 to 6 real example searches with curl, and a "Data and licence" section
+- [x] 8.2 DECISIONS.md: fill the TODOs
 - [ ] 8.3 Optional: GitHub Actions running the tests
-- [ ] 8.4 Fresh clone into an empty folder, follow README literally
+- [x] 8.4 Fresh clone into an empty folder, follow README literally
