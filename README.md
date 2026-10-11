@@ -20,12 +20,15 @@ containers.
 
 ## Getting started
 
+The app container runs as your own user. `.env` defaults to UID and GID
+1000; if `id -u` or `id -g` prints something else (on macOS often 501 and
+20), change `UID` and `GID` in `.env` first.
+
 ```bash
 git clone https://github.com/fistbumpfromdestiny/icd11-code-service.git
 cd icd11-code-service
-cp .env.example .env            # set UID and GID to the output of id -u and id -g
-docker compose up -d --build    # installs dependencies and runs migrations
-docker compose exec app php artisan key:generate
+cp .env.example .env
+docker compose up -d --build --wait   # installs dependencies, creates the app key, runs migrations
 ```
 
 The API is now on http://localhost:8000 and PostgreSQL on port 5433. Both
